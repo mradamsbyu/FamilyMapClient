@@ -1,4 +1,4 @@
-package map.family.familymapclient;
+package map.family.familymapclient.model;
 
 public class Model {
     /**

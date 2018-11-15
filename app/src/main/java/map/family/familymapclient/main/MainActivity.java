@@ -1,9 +1,11 @@
-package map.family.familymapclient;
+package map.family.familymapclient.main;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+
+import map.family.familymapclient.R;
 
 public class MainActivity extends AppCompatActivity {
 
