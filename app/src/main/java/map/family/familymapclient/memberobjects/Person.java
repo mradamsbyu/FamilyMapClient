@@ -1,4 +1,4 @@
-package map.server.model;
+package map.family.familymapclient.memberobjects;
 
 /**
  * A person object represents a person that is in the map

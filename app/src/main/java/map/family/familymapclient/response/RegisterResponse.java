@@ -1,4 +1,4 @@
-package map.server.response;
+package map.family.familymapclient.response;
 
 /**
  * Holds response data for the register service

@@ -1,8 +1,7 @@
-package map.server.response;
+package map.family.familymapclient.response;
 
 import java.util.ArrayList;
-
-import map.server.model.Person;
+import map.family.familymapclient.memberobjects.Person;
 
 /**
  * Holds response data for the person service

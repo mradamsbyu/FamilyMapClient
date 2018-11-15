@@ -1,4 +1,4 @@
-package map.server.model;
+package map.family.familymapclient.memberobjects;
 
 import java.util.UUID;
 

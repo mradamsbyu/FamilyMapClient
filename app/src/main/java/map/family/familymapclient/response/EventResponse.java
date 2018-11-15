@@ -1,8 +1,9 @@
-package map.server.response;
+package map.family.familymapclient.response;
+
 
 import java.util.ArrayList;
 
-import map.server.model.Event;
+import map.family.familymapclient.memberobjects.Event;
 
 /**
  * Holds response data for the event service

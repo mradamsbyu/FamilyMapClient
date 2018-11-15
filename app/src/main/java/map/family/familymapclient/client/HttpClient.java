@@ -14,101 +14,106 @@ import map.family.familymapclient.model.Model;
  * Created by mradams on 11/15/18.
  */
 
-public class Client {
-    // The Client's "main" method.
-    // The "args" parameter should contain two command-line arguments:
-    // 1. The IP address or domain name of the machine running the server
-    // 2. The port number on which the server is accepting Client connections
-    public static void main(String[] args) {
+public class HttpClient {
+    /**
+     * Singleton instance of the HttpClient class
+     */
+    private static HttpClient instance = null;
+    /**
+     *
+     */
+    private String serverHost;
+    private String serverPort;
 
-        String serverHost = args[0];
-        String serverPort = args[1];
-
-        getGameList(serverHost, serverPort);
-        claimRoute(serverHost, serverPort);
+    /**
+     * Singleton method for getting an instance of the HttpClient class
+     * @return instance of the HttpClient class
+     */
+    public static HttpClient getInstance() {
+        if (instance == null) {
+            instance = new HttpClient();
+        }
+        return instance;
     }
 
-    // The getGameList method calls the server's "/games/list" operation to
-    // retrieve a list of games running in the server in JSON format
-    private static void getGameList(String serverHost, String serverPort) {
+    /**
+     * Sets the port and host ip addresses
+     * @param serverHost host ip address
+     * @param serverPort port address
+     */
+    public void setServer(String serverHost, String serverPort) {
+        this.serverHost = serverHost;
+        this.serverPort = serverPort;
+    }
 
-        // This method shows how to send a GET request to a server
-
+    /**
+     * Make a get request to the Family Map Server
+     * @param urlPath URL path for the requested service (not including the server host or port)
+     * @return JSON string containing the response data or error information
+     */
+    public String getRequest(String urlPath) {
         try {
-            URL url = new URL("http://" + serverHost + ":" + serverPort + "/person");
+            URL url = new URL("http://" + instance.serverHost + ":" + instance.serverPort + urlPath);
             HttpURLConnection http = (HttpURLConnection)url.openConnection();
             http.setRequestMethod("GET");
-            // Indicate that this request will not contain an HTTP request body
             http.setDoOutput(false);
-
-            // Add an auth token to the request in the HTTP "Authorization" header
-            http.addRequestProperty("Authorization", "afj232hj2332");
-            // Specify that we would like to receive the server's response in JSON
-            // format by putting an HTTP "Accept" header on the request (this is not
-            // necessary because our server only returns JSON responses, but it
-            // provides one more example of how to add a header to an HTTP request).
-            http.addRequestProperty("Accept", "application/json");
-
-            // Connect to the server and send the HTTP request
+            http.addRequestProperty("Authorization", Model.getInstance().getUserAuthToken().getAuthToken());
             http.connect();
-            // By the time we get here, the HTTP response has been received from the server.
-            // Check to make sure that the HTTP response from the server contains a 200
-            // status code, which means "success".  Treat anything else as a failure.
             if (http.getResponseCode() == HttpURLConnection.HTTP_OK) {
-
-                // Get the input stream containing the HTTP response body
                 InputStream respBody = http.getInputStream();
-                // Extract JSON data from the HTTP response body
                 String respData = readString(respBody);
-                // Display the JSON data returned from the server
-                System.out.println(respData);
+                return respData;
             }
             else {
-                // The HTTP response status code indicates an error
-                // occurred, so print out the message from the HTTP response
-                System.out.println("ERROR: " + http.getResponseMessage());
+                return "ERROR: " + http.getResponseMessage();
             }
         }
         catch (IOException e) {
-            // An exception was thrown, so display the exception's stack trace
             e.printStackTrace();
+            return "IOException occurred";
         }
     }
 
-    private static void login(String serverHost, String serverPort, String userName, String password) {
+    /**
+     * Make a post request to the Family Map Server
+     * @param requestData JSON string holding the request data
+     * @param urlPath URL path for the requested service (not including the server host or port)
+     * @return JSON string containing the response data or error information
+     */
+    public String postRequest(String requestData, String urlPath) {
         try {
-            URL url = new URL("http://" + serverHost + ":" + serverPort + "/login");
+            URL url = new URL("http://" + instance.serverHost + ":" + instance.serverPort + urlPath);
             HttpURLConnection http = (HttpURLConnection)url.openConnection();
             http.setRequestMethod("POST");
             http.setDoOutput(true);	// There is a request body
             http.addRequestProperty("Authorization", Model.getInstance().getUserAuthToken().getAuthToken());
             http.connect();
-            String reqData =
-                    "{" +
-                            "\"userName\": \"" + userName + "\"," +
-                            "\"password\": \"" + password + "\"" +
-                            "}";
-            OutputStream reqBody = http.getOutputStream();
-            OutputStreamWriter sw = new OutputStreamWriter(reqBody);
-            sw.write(reqData);
+            OutputStream requestBody = http.getOutputStream();
+            OutputStreamWriter sw = new OutputStreamWriter(requestBody);
+            sw.write(requestData);
             sw.flush();
-            reqBody.close();
-
+            requestBody.close();
             if (http.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                System.out.println("Route successfully claimed.");
+                InputStream responseBody = http.getInputStream();
+                String responseData = readString(responseBody);
+                return responseData;
             }
             else {
-                System.out.println("ERROR: " + http.getResponseMessage());
+                return "ERROR: " + http.getResponseMessage();
             }
         }
         catch (IOException e) {
             e.printStackTrace();
+            return "IOException occurred";
         }
     }
 
-    /*
-        The readString method shows how to read a String from an InputStream.
-    */
+    /**
+     * Reads a string from InputString
+     * @param is InputString instance to read from
+     * @return String that is read from the input string
+     * @throws IOException Exception occurs there is a problem reading the input string
+     */
     private static String readString(InputStream is) throws IOException {
         StringBuilder sb = new StringBuilder();
         InputStreamReader sr = new InputStreamReader(is);

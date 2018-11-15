@@ -1,4 +1,4 @@
-package map.server.model;
+package map.family.familymapclient.memberobjects;
 
 /**
  * Event class objects represent an event in the life of a person

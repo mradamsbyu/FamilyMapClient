@@ -1,10 +1,11 @@
-package map.server.request;
+package map.family.familymapclient.request;
 
 import java.util.ArrayList;
 
-import map.server.model.Event;
-import map.server.model.Person;
-import map.server.model.User;
+import map.family.familymapclient.memberobjects.Event;
+import map.family.familymapclient.memberobjects.Person;
+import map.family.familymapclient.memberobjects.User;
+
 
 /**
  * Holds the request data for the load service

@@ -1,8 +1,8 @@
-package map.server.model;
+package map.family.familymapclient.memberobjects;
 
 import java.util.UUID;
 
-import map.server.request.RegisterRequest;
+import map.family.familymapclient.request.RegisterRequest;
 
 /**
  * The user class represents a Family Map user
