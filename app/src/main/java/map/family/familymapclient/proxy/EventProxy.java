@@ -30,7 +30,7 @@ public class EventProxy {
      * Proxy function for processing an event request
      * @return EventResponse object with response data from server
      */
-    public EventResponse getPersons() {
+    public EventResponse getEvents() {
         Gson gson = new Gson();
         String jsonResponse = HttpClient.getInstance().getRequest("/event");
         EventResponse response = gson.fromJson(jsonResponse, EventResponse.class);

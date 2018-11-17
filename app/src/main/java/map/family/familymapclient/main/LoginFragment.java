@@ -1,5 +1,6 @@
 package map.family.familymapclient.main;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
@@ -10,8 +11,17 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioButton;
+import android.widget.Toast;
 
 import map.family.familymapclient.R;
+import map.family.familymapclient.client.HttpClient;
+import map.family.familymapclient.proxy.EventProxy;
+import map.family.familymapclient.proxy.LoginProxy;
+import map.family.familymapclient.proxy.PersonProxy;
+import map.family.familymapclient.request.LoginRequest;
+import map.family.familymapclient.response.EventResponse;
+import map.family.familymapclient.response.LoginResponse;
+import map.family.familymapclient.response.PersonResponse;
 
 public class LoginFragment extends Fragment {
 
@@ -38,8 +48,26 @@ public class LoginFragment extends Fragment {
 
         mSignInButton = (Button) v.findViewById(R.id.sign_in_button);
         mSignInButton.setEnabled(false);
+        mSignInButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                LoginRequest request = new LoginRequest();
+                request.setPassword(mPasswordField.getText().toString());
+                request.setUserName(mUserNameField.getText().toString());
+                HttpClient.getInstance().setServer(mServerHostField.getText().toString(), mServerPortField.getText().toString());
+                LoginTask task = new LoginTask();
+                task.execute(request);
+            }
+        });
+
         mRegisterButton = (Button) v.findViewById(R.id.register_button);
         mRegisterButton.setEnabled(false);
+        mRegisterButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
 
         TextWatcher editTextWatcher = new TextWatcher() {
             @Override
@@ -72,6 +100,11 @@ public class LoginFragment extends Fragment {
         mEmailField = (EditText) v.findViewById(R.id.emailText);
         mEmailField.addTextChangedListener(editTextWatcher);
 
+        mServerHostField.setText("192.168.2.32");
+        mServerPortField.setText("8080");
+        mUserNameField.setText("usernm");
+        mPasswordField.setText("pass");
+
         mFemaleButton = (RadioButton) v.findViewById(R.id.female_button);
         mMaleButton = (RadioButton) v.findViewById(R.id.male_button);
 
@@ -98,5 +131,56 @@ public class LoginFragment extends Fragment {
                 mRegisterButton.setEnabled(true);
             }
         }
+    }
+
+    public class LoginTask extends AsyncTask<LoginRequest, Integer, LoginResponse> {
+        @Override
+        protected LoginResponse doInBackground(LoginRequest... request) {
+            LoginResponse response = LoginProxy.getInstance().login(request[0]);
+            return response;
+        }
+
+        @Override
+        protected void onPostExecute(LoginResponse response) {
+            if (response.getMessage() != null) {
+                Toast.makeText(getActivity(), response.getMessage(),Toast.LENGTH_SHORT).show();
+            }
+            else {
+
+            }
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+        }
+    }
+
+
+    public class RetrieveFamilyDataTask extends AsyncTask<Void, Void, FamilyDataResponse> {
+        @Override
+        protected FamilyDataResponse doInBackground(Void... params) {
+            PersonResponse personResponse = new PersonResponse();
+            EventResponse eventResponse = new EventResponse();
+            personResponse = PersonProxy.getInstance().getPersons();
+            eventResponse = EventProxy.getInstance().getEvents();
+            FamilyDataResponse response = new FamilyDataResponse();
+            response.eventResponse = eventResponse;
+            response.personResponse = personResponse;
+            return response;
+        }
+
+        @Override
+        protected void onPostExecute(FamilyDataResponse response) {
+            //Display first and last names
+        }
+
+        @Override
+        protected void onProgressUpdate(Void... params) {
+        }
+    }
+
+    public class FamilyDataResponse {
+        public PersonResponse personResponse;
+        public EventResponse eventResponse;
     }
 }

@@ -91,7 +91,7 @@ public class HttpClient {
             }
             http.connect();
             if (requestData != null) {
-                http.setDoOutput(true);
+                //http.setDoOutput(true);
                 OutputStream requestBody = http.getOutputStream();
                 OutputStreamWriter sw = new OutputStreamWriter(requestBody);
                 sw.write(requestData);

@@ -16,7 +16,7 @@ public class ProxyTests {
 
     @BeforeClass
     public static void setUP(){
-        HttpClient.getInstance().setServer("10.37.30.164","8080");
+        HttpClient.getInstance().setServer("192.168.2.32","8000");
     }
 
     @Test
