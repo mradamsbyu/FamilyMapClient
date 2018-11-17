@@ -1,6 +1,10 @@
 package map.family.familymapclient.proxy;
 
+import com.google.gson.Gson;
+
 import map.family.familymapclient.client.HttpClient;
+import map.family.familymapclient.memberobjects.Auth;
+import map.family.familymapclient.model.Model;
 import map.family.familymapclient.request.RegisterRequest;
 import map.family.familymapclient.response.RegisterResponse;
 
@@ -35,6 +39,9 @@ public class RegisterProxy {
         String jsonRequest = gson.toJson(request);
         String jsonResponse = HttpClient.getInstance().postRequest(jsonRequest, "/register");
         RegisterResponse response = gson.fromJson(jsonResponse, RegisterResponse.class);
+        if (response.getAuthToken() != null) {
+            Model.getInstance().setUserAuthToken(new Auth(response.getUserName(), response.getAuthToken()));
+        }
         return response;
     }
 }

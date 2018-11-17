@@ -62,6 +62,7 @@ public class HttpClient {
             if (http.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 InputStream respBody = http.getInputStream();
                 String respData = readString(respBody);
+                respBody.close();
                 return respData;
             }
             else {
@@ -76,7 +77,7 @@ public class HttpClient {
 
     /**
      * Make a post request to the Family Map Server
-     * @param requestData JSON string holding the request data
+     * @param requestData JSON string holding the request data.  Set as null if there is no request data
      * @param urlPath URL path for the requested service (not including the server host or port)
      * @return JSON string containing the response data or error information
      */
@@ -85,17 +86,25 @@ public class HttpClient {
             URL url = new URL("http://" + instance.serverHost + ":" + instance.serverPort + urlPath);
             HttpURLConnection http = (HttpURLConnection)url.openConnection();
             http.setRequestMethod("POST");
-            http.setDoOutput(true);	// There is a request body
-            http.addRequestProperty("Authorization", Model.getInstance().getUserAuthToken().getAuthToken());
+            if (Model.getInstance().authTokenExists()) {
+                http.addRequestProperty("Authorization", Model.getInstance().getUserAuthToken().getAuthToken());
+            }
             http.connect();
-            OutputStream requestBody = http.getOutputStream();
-            OutputStreamWriter sw = new OutputStreamWriter(requestBody);
-            sw.write(requestData);
-            sw.flush();
-            requestBody.close();
+            if (requestData != null) {
+                http.setDoOutput(true);
+                OutputStream requestBody = http.getOutputStream();
+                OutputStreamWriter sw = new OutputStreamWriter(requestBody);
+                sw.write(requestData);
+                sw.flush();
+                requestBody.close();
+            }
+            else {
+                http.setDoOutput(false);
+            }
             if (http.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 InputStream responseBody = http.getInputStream();
                 String responseData = readString(responseBody);
+                responseBody.close();
                 return responseData;
             }
             else {

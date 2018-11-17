@@ -1,5 +1,7 @@
 package map.family.familymapclient.proxy;
 
+import com.google.gson.Gson;
+
 import map.family.familymapclient.client.HttpClient;
 import map.family.familymapclient.response.EventResponse;
 

@@ -26,6 +26,13 @@ public class Model {
         return userAuthToken;
     }
 
+    public boolean authTokenExists() {
+        if (userAuthToken == null) {
+            return false;
+        }
+        return true;
+    }
+
     public void setUserAuthToken(Auth userAuthToken) {
         this.userAuthToken = userAuthToken;
     }

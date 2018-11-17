@@ -27,6 +27,16 @@ public class Auth {
     }
 
     /**
+     * Constructor that will set the username and auth token
+     * @param username username corresponding to the new auth token object
+     * @param authToken auth token string of the new auth token object
+     */
+    public Auth(String username, String authToken) {
+        this.username = username;
+        this.authToken = authToken;
+    }
+
+    /**
      * Generic constructor will not initialize anything
      */
     public Auth() {
