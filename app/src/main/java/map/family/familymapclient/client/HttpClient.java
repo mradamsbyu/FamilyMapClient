@@ -24,6 +24,7 @@ public class HttpClient {
      */
     private String serverHost;
     private String serverPort;
+    HttpURLConnection http;
 
     /**
      * Singleton method for getting an instance of the HttpClient class
@@ -54,7 +55,7 @@ public class HttpClient {
     public String getRequest(String urlPath) {
         try {
             URL url = new URL("http://" + instance.serverHost + ":" + instance.serverPort + urlPath);
-            HttpURLConnection http = (HttpURLConnection)url.openConnection();
+            http = (HttpURLConnection)url.openConnection();
             http.setRequestMethod("GET");
             http.setDoOutput(false);
             http.addRequestProperty("Authorization", Model.getInstance().getUserAuthToken().getAuthToken());
@@ -84,14 +85,16 @@ public class HttpClient {
     public String postRequest(String requestData, String urlPath) {
         try {
             URL url = new URL("http://" + instance.serverHost + ":" + instance.serverPort + urlPath);
-            HttpURLConnection http = (HttpURLConnection)url.openConnection();
+            http = (HttpURLConnection)url.openConnection();
             http.setRequestMethod("POST");
+            if (requestData != null) {
+                http.setDoOutput(true);
+            }
             if (Model.getInstance().authTokenExists()) {
                 http.addRequestProperty("Authorization", Model.getInstance().getUserAuthToken().getAuthToken());
             }
             http.connect();
             if (requestData != null) {
-                //http.setDoOutput(true);
                 OutputStream requestBody = http.getOutputStream();
                 OutputStreamWriter sw = new OutputStreamWriter(requestBody);
                 sw.write(requestData);

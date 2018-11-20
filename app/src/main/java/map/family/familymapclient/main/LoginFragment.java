@@ -15,13 +15,17 @@ import android.widget.Toast;
 
 import map.family.familymapclient.R;
 import map.family.familymapclient.client.HttpClient;
+import map.family.familymapclient.memberobjects.Person;
 import map.family.familymapclient.proxy.EventProxy;
 import map.family.familymapclient.proxy.LoginProxy;
 import map.family.familymapclient.proxy.PersonProxy;
+import map.family.familymapclient.proxy.RegisterProxy;
 import map.family.familymapclient.request.LoginRequest;
+import map.family.familymapclient.request.RegisterRequest;
 import map.family.familymapclient.response.EventResponse;
 import map.family.familymapclient.response.LoginResponse;
 import map.family.familymapclient.response.PersonResponse;
+import map.family.familymapclient.response.RegisterResponse;
 
 public class LoginFragment extends Fragment {
 
@@ -51,10 +55,10 @@ public class LoginFragment extends Fragment {
         mSignInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                HttpClient.getInstance().setServer(mServerHostField.getText().toString(), mServerPortField.getText().toString());
                 LoginRequest request = new LoginRequest();
                 request.setPassword(mPasswordField.getText().toString());
                 request.setUserName(mUserNameField.getText().toString());
-                HttpClient.getInstance().setServer(mServerHostField.getText().toString(), mServerPortField.getText().toString());
                 LoginTask task = new LoginTask();
                 task.execute(request);
             }
@@ -65,7 +69,21 @@ public class LoginFragment extends Fragment {
         mRegisterButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                HttpClient.getInstance().setServer(mServerHostField.getText().toString(), mServerPortField.getText().toString());
+                RegisterRequest request = new RegisterRequest();
+                request.setPassword(mPasswordField.getText().toString());
+                request.setUserName(mUserNameField.getText().toString());
+                request.setEmail(mEmailField.getText().toString());
+                request.setFirstName(mFirstNameField.getText().toString());
+                request.setLastName(mLastNameField.getText().toString());
+                if (mFemaleButton.isChecked()) {
+                    request.setGender("f");
+                }
+                else {
+                    request.setGender("m");
+                }
+                RegisterTask task = new RegisterTask();
+                task.execute(request);
             }
         });
 
@@ -100,7 +118,7 @@ public class LoginFragment extends Fragment {
         mEmailField = (EditText) v.findViewById(R.id.emailText);
         mEmailField.addTextChangedListener(editTextWatcher);
 
-        mServerHostField.setText("192.168.2.32");
+        mServerHostField.setText("192.168.255.231");
         mServerPortField.setText("8080");
         mUserNameField.setText("usernm");
         mPasswordField.setText("pass");
@@ -142,11 +160,14 @@ public class LoginFragment extends Fragment {
 
         @Override
         protected void onPostExecute(LoginResponse response) {
-            if (response.getMessage() != null) {
-                Toast.makeText(getActivity(), response.getMessage(),Toast.LENGTH_SHORT).show();
-            }
-            else {
-
+            if (response != null) {
+                if (response.getMessage() != null) {
+                    Toast.makeText(getActivity(), response.getMessage(),Toast.LENGTH_LONG).show();
+                }
+                else {
+                    RetrieveFamilyDataTask task = new RetrieveFamilyDataTask();
+                    task.execute();
+                }
             }
         }
 
@@ -155,14 +176,35 @@ public class LoginFragment extends Fragment {
         }
     }
 
+    public class RegisterTask extends AsyncTask<RegisterRequest, Integer, RegisterResponse> {
+        @Override
+        protected RegisterResponse doInBackground(RegisterRequest... request) {
+            RegisterResponse response = RegisterProxy.getInstance().register(request[0]);
+            return response;
+        }
+
+        @Override
+        protected void onPostExecute(RegisterResponse response) {
+            if (response != null) {
+                if (response.getErrorMessage() != null) {
+                    Toast.makeText(getActivity(), response.getErrorMessage(), Toast.LENGTH_LONG).show();
+                } else {
+                    RetrieveFamilyDataTask task = new RetrieveFamilyDataTask();
+                    task.execute();
+                }
+            }
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+        }
+    }
 
     public class RetrieveFamilyDataTask extends AsyncTask<Void, Void, FamilyDataResponse> {
         @Override
         protected FamilyDataResponse doInBackground(Void... params) {
-            PersonResponse personResponse = new PersonResponse();
-            EventResponse eventResponse = new EventResponse();
-            personResponse = PersonProxy.getInstance().getPersons();
-            eventResponse = EventProxy.getInstance().getEvents();
+            PersonResponse personResponse = PersonProxy.getInstance().getPersons();
+            EventResponse eventResponse = EventProxy.getInstance().getEvents();
             FamilyDataResponse response = new FamilyDataResponse();
             response.eventResponse = eventResponse;
             response.personResponse = personResponse;
@@ -171,7 +213,13 @@ public class LoginFragment extends Fragment {
 
         @Override
         protected void onPostExecute(FamilyDataResponse response) {
-            //Display first and last names
+            // Display first and last name (iterate through the response people until you find
+            for (Person person : response.personResponse.getPersons()) {
+                if (person.getSpouse() == null) {
+                    Toast.makeText(getActivity(), person.getFirstName() + " " + person.getLastName(), Toast.LENGTH_LONG).show();
+                    break;
+                }
+            }
         }
 
         @Override

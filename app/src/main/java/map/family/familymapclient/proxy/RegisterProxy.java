@@ -37,11 +37,17 @@ public class RegisterProxy {
     public RegisterResponse register(RegisterRequest request) {
         Gson gson = new Gson();
         String jsonRequest = gson.toJson(request);
-        String jsonResponse = HttpClient.getInstance().postRequest(jsonRequest, "/register");
-        RegisterResponse response = gson.fromJson(jsonResponse, RegisterResponse.class);
-        if (response.getAuthToken() != null) {
-            Model.getInstance().setUserAuthToken(new Auth(response.getUserName(), response.getAuthToken()));
+        String jsonResponse = HttpClient.getInstance().postRequest(jsonRequest, "/user/register");
+        if (jsonResponse.startsWith("{")) {
+            RegisterResponse response = gson.fromJson(jsonResponse, RegisterResponse.class);
+            if (response.getAuthToken() != null) {
+                Model.getInstance().setUserAuthToken(new Auth(response.getUserName(), response.getAuthToken()));
+            }
+            return response;
         }
-        return response;
+        else {
+            System.out.println(jsonResponse);
+            return null;
+        }
     }
 }

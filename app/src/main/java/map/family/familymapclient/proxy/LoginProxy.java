@@ -37,11 +37,17 @@ public class LoginProxy {
     public LoginResponse login(LoginRequest request) {
         Gson gson = new Gson();
         String jsonRequest = gson.toJson(request);
-        String jsonResponse = HttpClient.getInstance().postRequest(jsonRequest, "/login");
-        LoginResponse response = gson.fromJson(jsonResponse, LoginResponse.class);
-        if (response.getAuthToken() != null) {
-            Model.getInstance().setUserAuthToken(new Auth(response.getUserName(), response.getAuthToken()));
+        String jsonResponse = HttpClient.getInstance().postRequest(jsonRequest, "/user/login");
+        if (jsonResponse.startsWith("{")) {
+            LoginResponse response = gson.fromJson(jsonResponse, LoginResponse.class);
+            if (response.getAuthToken() != null) {
+                Model.getInstance().setUserAuthToken(new Auth(response.getUserName(), response.getAuthToken()));
+            }
+            return response;
         }
-        return response;
+        else {
+            System.out.println(jsonResponse);
+            return null;
+        }
     }
 }
