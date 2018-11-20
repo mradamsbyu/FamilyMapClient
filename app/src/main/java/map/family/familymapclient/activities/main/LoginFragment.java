@@ -1,8 +1,9 @@
-package map.family.familymapclient.main;
+package map.family.familymapclient.activities.main;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -16,6 +17,7 @@ import android.widget.Toast;
 import map.family.familymapclient.R;
 import map.family.familymapclient.client.HttpClient;
 import map.family.familymapclient.memberobjects.Person;
+import map.family.familymapclient.model.Model;
 import map.family.familymapclient.proxy.EventProxy;
 import map.family.familymapclient.proxy.LoginProxy;
 import map.family.familymapclient.proxy.PersonProxy;
@@ -50,7 +52,7 @@ public class LoginFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_login, container, false);
 
-        mSignInButton = (Button) v.findViewById(R.id.sign_in_button);
+        mSignInButton = v.findViewById(R.id.sign_in_button);
         mSignInButton.setEnabled(false);
         mSignInButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -64,7 +66,7 @@ public class LoginFragment extends Fragment {
             }
         });
 
-        mRegisterButton = (Button) v.findViewById(R.id.register_button);
+        mRegisterButton = v.findViewById(R.id.register_button);
         mRegisterButton.setEnabled(false);
         mRegisterButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -103,19 +105,19 @@ public class LoginFragment extends Fragment {
             public void afterTextChanged(Editable s) {
             }
         };
-        mServerHostField = (EditText) v.findViewById(R.id.serverHostText);
+        mServerHostField = v.findViewById(R.id.serverHostText);
         mServerHostField.addTextChangedListener(editTextWatcher);
-        mServerPortField = (EditText) v.findViewById(R.id.serverPortText);
+        mServerPortField = v.findViewById(R.id.serverPortText);
         mServerPortField.addTextChangedListener(editTextWatcher);
-        mUserNameField = (EditText) v.findViewById(R.id.userNameText);
+        mUserNameField = v.findViewById(R.id.userNameText);
         mUserNameField.addTextChangedListener(editTextWatcher);
-        mPasswordField = (EditText) v.findViewById(R.id.passwordText);
+        mPasswordField = v.findViewById(R.id.passwordText);
         mPasswordField.addTextChangedListener(editTextWatcher);
-        mFirstNameField = (EditText) v.findViewById(R.id.firstNameText);
+        mFirstNameField = v.findViewById(R.id.firstNameText);
         mFirstNameField.addTextChangedListener(editTextWatcher);
-        mLastNameField = (EditText) v.findViewById(R.id.lastNameText);
+        mLastNameField = v.findViewById(R.id.lastNameText);
         mLastNameField.addTextChangedListener(editTextWatcher);
-        mEmailField = (EditText) v.findViewById(R.id.emailText);
+        mEmailField = v.findViewById(R.id.emailText);
         mEmailField.addTextChangedListener(editTextWatcher);
 
         mServerHostField.setText("192.168.255.231");
@@ -123,8 +125,8 @@ public class LoginFragment extends Fragment {
         mUserNameField.setText("usernm");
         mPasswordField.setText("pass");
 
-        mFemaleButton = (RadioButton) v.findViewById(R.id.female_button);
-        mMaleButton = (RadioButton) v.findViewById(R.id.male_button);
+        mFemaleButton = v.findViewById(R.id.female_button);
+        mMaleButton = v.findViewById(R.id.male_button);
 
         return v;
     }
@@ -213,13 +215,13 @@ public class LoginFragment extends Fragment {
 
         @Override
         protected void onPostExecute(FamilyDataResponse response) {
-            // Display first and last name (iterate through the response people until you find
-            for (Person person : response.personResponse.getPersons()) {
-                if (person.getSpouse() == null) {
-                    Toast.makeText(getActivity(), person.getFirstName() + " " + person.getLastName(), Toast.LENGTH_LONG).show();
-                    break;
-                }
-            }
+            Model.getInstance().setEvents(response.eventResponse.getEvents());
+            Model.getInstance().setPersons(response.personResponse.getPersons());
+            TopLevelMapFragment mapFragment = new TopLevelMapFragment();
+            FragmentTransaction transaction = getFragmentManager().beginTransaction();
+            transaction.replace(R.id.fragment_container, mapFragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
         }
 
         @Override

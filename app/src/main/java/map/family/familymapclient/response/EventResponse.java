@@ -62,7 +62,7 @@ public class EventResponse {
     /**
      * Array to hold multiple event data
      */
-    private Event[] events = null;
+    private ArrayList<Event> events = null;
 
     /**
      * Constructor with data passed in
@@ -183,15 +183,12 @@ public class EventResponse {
         this.year = year;
     }
 
-    public Event[] getEvents() {
+    public ArrayList<Event> getEvents() {
         return events;
     }
 
     public void setEvents(ArrayList<Event> events) {
-        this.events = new Event[events.size()];
-        for (int i = 0; i < events.size(); i++) {
-            this.events[i] = events.get(i);
-        }
+        this.events = events;
     }
 
     public String getMessage() {
