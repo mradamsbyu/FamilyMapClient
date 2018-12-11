@@ -1,4 +1,4 @@
-package map.family.familymapclient.activities.main;
+package map.family.familymapclient.fragments.login;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -15,8 +15,8 @@ import android.widget.RadioButton;
 import android.widget.Toast;
 
 import map.family.familymapclient.R;
+import map.family.familymapclient.fragments.map.TopLevelMapFragment;
 import map.family.familymapclient.client.HttpClient;
-import map.family.familymapclient.memberobjects.Person;
 import map.family.familymapclient.model.Model;
 import map.family.familymapclient.proxy.EventProxy;
 import map.family.familymapclient.proxy.LoginProxy;
@@ -120,7 +120,7 @@ public class LoginFragment extends Fragment {
         mEmailField = v.findViewById(R.id.emailText);
         mEmailField.addTextChangedListener(editTextWatcher);
 
-        mServerHostField.setText("192.168.255.231");
+        mServerHostField.setText("192.168.252.104");
         mServerPortField.setText("8080");
         mUserNameField.setText("usernm");
         mPasswordField.setText("pass");
@@ -217,6 +217,7 @@ public class LoginFragment extends Fragment {
         protected void onPostExecute(FamilyDataResponse response) {
             Model.getInstance().setEvents(response.eventResponse.getEvents());
             Model.getInstance().setPersons(response.personResponse.getPersons());
+            Model.getInstance().updateEventPersonMap();
             TopLevelMapFragment mapFragment = new TopLevelMapFragment();
             FragmentTransaction transaction = getFragmentManager().beginTransaction();
             transaction.replace(R.id.fragment_container, mapFragment);

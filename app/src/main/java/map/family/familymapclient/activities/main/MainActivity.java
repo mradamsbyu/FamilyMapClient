@@ -1,12 +1,12 @@
 package map.family.familymapclient.activities.main;
 
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
-import android.support.v7.app.AppCompatActivity;
+import com.joanzapata.iconify.Iconify;
+import com.joanzapata.iconify.fonts.FontAwesomeModule;
 import android.os.Bundle;
 
 import map.family.familymapclient.R;
+import map.family.familymapclient.fragments.login.LoginFragment;
 
 public class MainActivity extends FragmentActivity {
 
@@ -20,7 +20,7 @@ public class MainActivity extends FragmentActivity {
                 return;
             }
             LoginFragment loginFragment = new LoginFragment();
-
+            Iconify.with(new FontAwesomeModule());
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.fragment_container, loginFragment).commit();
         }

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/PersonFirstName"
+            android:layout_width="match_parent"
+            android:layout_height="41dp"
+            android:layout_marginEnd="48dp"
+            android:layout_marginTop="4dp"
+            android:textColor="@android:color/background_dark"
+            android:textSize="30sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/textViewFirst"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="First Name" />
+
+        <TextView
+            android:id="@+id/PersonLastName"
+            android:layout_width="match_parent"
+            android:layout_height="41dp"
+            android:layout_marginEnd="48dp"
+            android:layout_marginTop="4dp"
+            android:textColor="@android:color/background_dark"
+            android:textSize="30sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/textViewLast"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Last Name" />
+
+        <TextView
+            android:id="@+id/PersonGender"
+            android:layout_width="match_parent"
+            android:layout_height="41dp"
+            android:layout_marginEnd="48dp"
+            android:layout_marginTop="4dp"
+            android:textColor="@android:color/background_dark"
+            android:textSize="30sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/textViewGender"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Gender" />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <!--ExpandableListView
+            android:id="@+id/expandableListView"
+            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:indicatorLeft="?android:attr/expandableListPreferredItemIndicatorLeft"
+            android:divider="@android:color/darker_gray"
+            android:dividerHeight="0.5dp" /-->
+
+    </LinearLayout>
+
+
+</android.support.constraint.ConstraintLayout>
