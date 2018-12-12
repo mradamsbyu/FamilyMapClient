@@ -49,14 +49,17 @@ public class TopLevelMapFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_top_level_map, container, false);
         textViewName = view.findViewById(R.id.topMapName);
+        textViewName.setText("Click on a marker to\n   see event details");
         textViewDetails = view.findViewById(R.id.topMapDetails);
         genderImageView = view.findViewById(R.id.topMapGenderImage);
         event_display = view.findViewById(R.id.event_info);
         event_display.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), PersonActivity.class);
-                startActivity(intent);
+                if (Model.getInstance().getCurrentPerson() != null) {
+                    Intent intent = new Intent(getActivity(), PersonActivity.class);
+                    startActivity(intent);
+                }
             }
         });
         mapView = view.findViewById(R.id.map);
@@ -157,10 +160,12 @@ public class TopLevelMapFragment extends Fragment {
     private void initMarkers() {
         Marker marker;
         for (Event event : Model.getInstance().getEvents()) {
-            LatLng eventLatLng = new LatLng(event.getLatitude(), event.getLongitude());
-            marker = map.addMarker(new MarkerOptions().position(eventLatLng).icon(BitmapDescriptorFactory
-                    .defaultMarker(Model.getInstance().getEventTypeColor(event.getEventType()))));
-            Model.getInstance().setEventMarker(event, marker);
+            if (!Model.getInstance().isFiltered(event)) {
+                LatLng eventLatLng = new LatLng(event.getLatitude(), event.getLongitude());
+                marker = map.addMarker(new MarkerOptions().position(eventLatLng).icon(BitmapDescriptorFactory
+                        .defaultMarker(Model.getInstance().getEventTypeColor(event.getEventType()))));
+                Model.getInstance().setEventMarker(event, marker);
+            }
         }
     }
 
