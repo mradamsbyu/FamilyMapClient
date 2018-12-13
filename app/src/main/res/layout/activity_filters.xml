@@ -1,138 +1,16 @@
-<?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_margin="16dp"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<ScrollView android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <LinearLayout
+    <LinearLayout android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:divider="?android:dividerHorizontal"
-        android:showDividers="middle">
+        xmlns:android="http://schemas.android.com/apk/res/android">
 
-        <LinearLayout
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/filter_recycler_view"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <LinearLayout
-                android:layout_width="305dp"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <TextView
-                    style="?android:listSeparatorTextViewStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:text="Baptism Events" />
-
-                <TextView
-                    style="?android:listSeparatorTextViewStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:text="FILTER BY BAPTISM EVENTS"
-                    android:textSize="10sp" />
-            </LinearLayout>
-
-            <Switch
-                android:id="@+id/baptsimFilterSwitch"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <LinearLayout
-                android:layout_width="305dp"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <TextView
-                    style="?android:listSeparatorTextViewStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:text="Birth Events" />
-
-                <TextView
-                    style="?android:listSeparatorTextViewStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:text="FILTER BY BIRTH EVENTS"
-                    android:textSize="10sp" />
-            </LinearLayout>
-
-            <Switch
-                android:id="@+id/birthFilterSwitch"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <LinearLayout
-                android:layout_width="305dp"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <TextView
-                    style="?android:listSeparatorTextViewStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:text="Marriage Events" />
-
-                <TextView
-                    style="?android:listSeparatorTextViewStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:text="FILTER BY MARRIAGE EVENTS"
-                    android:textSize="10sp" />
-            </LinearLayout>
-
-            <Switch
-                android:id="@+id/marriageFilterSwitch"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <LinearLayout
-                android:layout_width="305dp"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <TextView
-                    style="?android:listSeparatorTextViewStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:text="Death Events" />
-
-                <TextView
-                    style="?android:listSeparatorTextViewStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:text="FILTER BY DEATH EVENTS"
-                    android:textSize="10sp" />
-            </LinearLayout>
-            <Switch
-                android:id="@+id/deathFilterSwitch"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical" />
-        </LinearLayout>
+            android:layout_height="wrap_content"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -258,6 +136,5 @@
                 android:layout_height="match_parent"
                 android:gravity="center_vertical" />
         </LinearLayout>
-
     </LinearLayout>
 </ScrollView>

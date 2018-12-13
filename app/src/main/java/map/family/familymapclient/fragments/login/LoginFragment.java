@@ -14,9 +14,13 @@ import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.Toast;
 
+import java.util.HashSet;
+
 import map.family.familymapclient.R;
 import map.family.familymapclient.fragments.map.TopLevelMapFragment;
 import map.family.familymapclient.client.HttpClient;
+import map.family.familymapclient.memberobjects.Event;
+import map.family.familymapclient.memberobjects.Person;
 import map.family.familymapclient.model.Model;
 import map.family.familymapclient.proxy.EventProxy;
 import map.family.familymapclient.proxy.LoginProxy;
@@ -120,10 +124,10 @@ public class LoginFragment extends Fragment {
         mEmailField = v.findViewById(R.id.emailText);
         mEmailField.addTextChangedListener(editTextWatcher);
 
-        mServerHostField.setText("192.168.252.104");
+        mServerHostField.setText("192.168.252.30");
         mServerPortField.setText("8080");
-        mUserNameField.setText("usernm");
-        mPasswordField.setText("pass");
+        mUserNameField.setText("sheila");
+        mPasswordField.setText("parker");
 
         mFemaleButton = v.findViewById(R.id.female_button);
         mMaleButton = v.findViewById(R.id.male_button);
@@ -215,8 +219,8 @@ public class LoginFragment extends Fragment {
 
         @Override
         protected void onPostExecute(FamilyDataResponse response) {
-            Model.getInstance().setEvents(response.eventResponse.getEvents());
-            Model.getInstance().setPersons(response.personResponse.getPersons());
+            Model.getInstance().setEvents(new HashSet<Event>(response.eventResponse.getEvents()));
+            Model.getInstance().setPersons(new HashSet<Person>(response.personResponse.getPersons()));
             Model.getInstance().updateEventTypes();
             Model.getInstance().updateEventPersonMap();
             TopLevelMapFragment mapFragment = new TopLevelMapFragment();

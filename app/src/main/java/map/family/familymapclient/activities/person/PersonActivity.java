@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import map.family.familymapclient.R;
+import map.family.familymapclient.activities.event.EventActivity;
 import map.family.familymapclient.memberobjects.Event;
 import map.family.familymapclient.memberobjects.Person;
 import map.family.familymapclient.model.Model;
@@ -99,9 +100,9 @@ public class PersonActivity extends AppCompatActivity {
         List<Event> events;
         events = Model.getInstance().getEventsFromPersonId(person.getPersonID());
         for (Event event : events) {
-            lifeEventsInfo.add("e" + event.getEventID());
-            /*lifeEventsInfo.add("e" + event.getEventType() + ": " + event.getCity() + ", " + event.getCountry() +
-                    " (" + event.getYear() + ")\n" + person.getFirstName() + " " + person.getLastName());*/
+            if (!Model.getInstance().isFiltered(event)) {
+                lifeEventsInfo.add("e" + event.getEventID());
+            }
         }
         Person spouse = Model.getInstance().getPersonFromId(person.getSpouse());
         Person mother = Model.getInstance().getPersonFromId(person.getMother());
@@ -115,7 +116,6 @@ public class PersonActivity extends AppCompatActivity {
         }
         if (father != null) {
             familyInfo.add("f" + father.getPersonID());
-//            familyInfo.add("p" + father.getGender() + father.getFirstName() + " " + father.getLastName() + "\nFather");
         }
         for (Person child : children) {
             familyInfo.add("c" + child.getPersonID());
@@ -143,7 +143,7 @@ public class PersonActivity extends AppCompatActivity {
 
         @Override
         public Holder onCreateChildViewHolder(@NonNull ViewGroup viewGroup, int i) {
-            View view = inflater.inflate(R.layout.list_life_events, viewGroup, false);
+            View view = inflater.inflate(R.layout.list_person, viewGroup, false);
             return new Holder(view);
         }
 
@@ -182,11 +182,14 @@ public class PersonActivity extends AppCompatActivity {
         private ImageView iconView;
         private Person personRelative;
         private Event personEvent;
+        private View expandedItem;
 
         public Holder(View view) {
             super(view);
             descriptiveText = view.findViewById(R.id.personEventInfo);
             iconView = view.findViewById(R.id.personLocationImage);
+            expandedItem = view.findViewById(R.id.expandedPersonItem);
+            expandedItem.setOnClickListener(this);
         }
 
         void bind(String text) {
@@ -239,9 +242,9 @@ public class PersonActivity extends AppCompatActivity {
             }
             else if (personEvent != null) {
                 Model.getInstance().setCurrentEvent(personEvent);
+                Intent intent = new Intent(PersonActivity.this, EventActivity.class);
+                startActivity(intent);
             }
         }
-
     }
-
 }
