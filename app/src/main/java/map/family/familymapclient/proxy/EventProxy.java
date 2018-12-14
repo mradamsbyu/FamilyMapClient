@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 
 import map.family.familymapclient.client.HttpClient;
 import map.family.familymapclient.response.EventResponse;
-import map.family.familymapclient.response.PersonResponse;
 
 /**
  * Created by mradams on 11/15/18.
@@ -33,15 +32,8 @@ public class EventProxy {
      */
     public EventResponse getEvents() {
         Gson gson = new Gson();
-        EventResponse response;
         String jsonResponse = HttpClient.getInstance().getRequest("/event");
-        if (jsonResponse.equals("IOException occurred")) {
-            response = new EventResponse();
-            response.setErrorMessage("IOException occurred");
-        }
-        else {
-            response = gson.fromJson(jsonResponse, EventResponse.class);
-        }
+        EventResponse response = gson.fromJson(jsonResponse, EventResponse.class);
         return response;
     }
 }

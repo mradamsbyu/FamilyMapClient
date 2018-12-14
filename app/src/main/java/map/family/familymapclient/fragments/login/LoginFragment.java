@@ -217,7 +217,6 @@ public class LoginFragment extends Fragment {
         protected void onPostExecute(FamilyDataResponse response) {
             Model.getInstance().setEvents(response.eventResponse.getEvents());
             Model.getInstance().setPersons(response.personResponse.getPersons());
-            Model.getInstance().updateEventTypes();
             Model.getInstance().updateEventPersonMap();
             TopLevelMapFragment mapFragment = new TopLevelMapFragment();
             FragmentTransaction transaction = getFragmentManager().beginTransaction();

@@ -32,15 +32,8 @@ public class PersonProxy {
      */
     public PersonResponse getPersons() {
         Gson gson = new Gson();
-        PersonResponse response;
         String jsonResponse = HttpClient.getInstance().getRequest("/person");
-        if (jsonResponse.equals("IOException occurred")) {
-            response = new PersonResponse();
-            response.setError("IOException occurred");
-        }
-        else {
-            response = gson.fromJson(jsonResponse, PersonResponse.class);
-        }
+        PersonResponse response = gson.fromJson(jsonResponse, PersonResponse.class);
         return response;
     }
 }

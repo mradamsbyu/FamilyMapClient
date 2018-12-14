@@ -1,7 +1,6 @@
 package map.family.familymapclient.activities.person;
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -24,6 +23,8 @@ import com.joanzapata.iconify.fonts.FontAwesomeIcons;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import map.family.familymapclient.R;
 import map.family.familymapclient.memberobjects.Event;
@@ -42,7 +43,10 @@ public class PersonActivity extends AppCompatActivity {
     private ArrayList<String> familyInfo = new ArrayList<>();
 
     // groups of items that can expand/collapse
-    List<Group> groups;
+    List<Group> groups = Arrays.asList(
+            new Group("LIFE EVENTS", lifeEventsInfo.toArray(new String[lifeEventsInfo.size()])),
+            new Group("FAMILY", familyInfo.toArray(new String[familyInfo.size()]))
+    );
 
     public class Group implements Parent<String> {
 
@@ -72,13 +76,14 @@ public class PersonActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_person);
+        //getSupportActionBar().setDisplayShowHomeEnabled(true);
         person = Model.getInstance().getCurrentPerson(); //Will this be a problem when you press back from another person view and the current person is different
         firstName = findViewById(R.id.PersonFirstName);
         lastName = findViewById(R.id.PersonLastName);
         gender = findViewById(R.id.PersonGender);
-        setPersonData();
-        recyclerView = findViewById(R.id.recycler_view);
+        recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        setPersonData();
         updateUI();
     }
 
@@ -97,33 +102,11 @@ public class PersonActivity extends AppCompatActivity {
 
     private void setPersonData() {
         List<Event> events;
-        events = Model.getInstance().getEventsFromPersonId(person.getPersonID());
+        events = Model.getInstance().getEvents(person.getPersonID());
         for (Event event : events) {
-            lifeEventsInfo.add("e" + event.getEventID());
-            /*lifeEventsInfo.add("e" + event.getEventType() + ": " + event.getCity() + ", " + event.getCountry() +
-                    " (" + event.getYear() + ")\n" + person.getFirstName() + " " + person.getLastName());*/
+            lifeEventsInfo.add(event.getEventType() + ": " + event.getCity() + ", " + event.getCountry() +
+                    "(" + event.getYear() + ")\n" + person.getFirstName() + " " + person.getLastName());
         }
-        Person spouse = Model.getInstance().getPersonFromId(person.getSpouse());
-        Person mother = Model.getInstance().getPersonFromId(person.getMother());
-        Person father = Model.getInstance().getPersonFromId(person.getFather());
-        List<Person> children = Model.getInstance().getChildren(person.getPersonID(), person.getGender().equals("m"));
-        if (spouse != null) {
-            familyInfo.add("s" + spouse.getPersonID());
-        }
-        if (mother != null) {
-            familyInfo.add("m" + mother.getPersonID());
-        }
-        if (father != null) {
-            familyInfo.add("f" + father.getPersonID());
-//            familyInfo.add("p" + father.getGender() + father.getFirstName() + " " + father.getLastName() + "\nFather");
-        }
-        for (Person child : children) {
-            familyInfo.add("c" + child.getPersonID());
-        }
-        groups = Arrays.asList(
-                new Group("LIFE EVENTS", lifeEventsInfo.toArray(new String[lifeEventsInfo.size()])),
-                new Group("FAMILY", familyInfo.toArray(new String[familyInfo.size()]))
-        );
     }
 
     class Adapter extends ExpandableRecyclerAdapter<Group, String, GroupHolder, Holder> {
@@ -177,11 +160,8 @@ public class PersonActivity extends AppCompatActivity {
     class Holder extends ChildViewHolder implements View.OnClickListener {
 
         private TextView descriptiveText;
-        String textDescription;
         private Drawable icon;
         private ImageView iconView;
-        private Person personRelative;
-        private Event personEvent;
 
         public Holder(View view) {
             super(view);
@@ -190,56 +170,18 @@ public class PersonActivity extends AppCompatActivity {
         }
 
         void bind(String text) {
-            if (text.charAt(0) == 'm') {
-                personRelative = Model.getInstance().getPersonFromId(text.substring(1));
-                textDescription = personRelative.getFirstName() + " " + personRelative.getLastName() + "\nMother";
-                icon = new IconDrawable(recyclerView.getContext(), FontAwesomeIcons.fa_female).colorRes(R.color.female_icon).sizeDp(40);
-            }
-            else if (text.charAt(0) == 'f') {
-                personRelative = Model.getInstance().getPersonFromId(text.substring(1));
-                textDescription = personRelative.getFirstName() + " " + personRelative.getLastName() + "\nFather";
+            descriptiveText.setText(text);
+            if (person.getGender().equals("m")) {
                 icon = new IconDrawable(recyclerView.getContext(), FontAwesomeIcons.fa_male).colorRes(R.color.male_icon).sizeDp(40);
             }
-            else if (text.charAt(0) == 's') {
-                personRelative = Model.getInstance().getPersonFromId(text.substring(1));
-                textDescription = personRelative.getFirstName() + " " + personRelative.getLastName() + "\nSpouse";
-                if (personRelative.getGender().equals("m")) {
-                    icon = new IconDrawable(recyclerView.getContext(), FontAwesomeIcons.fa_male).colorRes(R.color.male_icon).sizeDp(40);
-                }
-                else {
-                    icon = new IconDrawable(recyclerView.getContext(), FontAwesomeIcons.fa_female).colorRes(R.color.female_icon).sizeDp(40);
-                }
-            }
-            else if (text.charAt(0) == 'c') {
-                personRelative = Model.getInstance().getPersonFromId(text.substring(1));
-                textDescription = personRelative.getFirstName() + " " + personRelative.getLastName() + "\nChild";
-                if (personRelative.getGender().equals("m")) {
-                    icon = new IconDrawable(recyclerView.getContext(), FontAwesomeIcons.fa_male).colorRes(R.color.male_icon).sizeDp(40);
-                }
-                else {
-                    icon = new IconDrawable(recyclerView.getContext(), FontAwesomeIcons.fa_female).colorRes(R.color.female_icon).sizeDp(40);
-                }
-            }
-            else if (text.charAt(0) == 'e'){
-                personEvent = Model.getInstance().getEventFromEventId(text.substring(1));
-                textDescription = personEvent.getEventType() + ": " + personEvent.getCity() + ", " + personEvent.getCountry() +
-                        " (" + personEvent.getYear() + ")\n" + person.getFirstName() + " " + person.getLastName();
-                icon = new IconDrawable(recyclerView.getContext(), FontAwesomeIcons.fa_map_marker).colorRes(R.color.event_icon).sizeDp(40);
+            else {
+                icon = new IconDrawable(recyclerView.getContext(), FontAwesomeIcons.fa_female).colorRes(R.color.female_icon).sizeDp(40);
             }
             iconView.setImageDrawable(icon);
-            descriptiveText.setText(textDescription);
         }
 
         @Override
         public void onClick(View view) {
-            if (personRelative != null) {
-                Model.getInstance().setCurrentPerson(personRelative);
-                Intent intent = new Intent(PersonActivity.this, PersonActivity.class);
-                startActivity(intent);
-            }
-            else if (personEvent != null) {
-                Model.getInstance().setCurrentEvent(personEvent);
-            }
         }
 
     }
