@@ -10,4 +10,7 @@
     <color name="female_icon">
         #ff40af
     </color>
+    <color name="event_icon">
+        #9cc7e2
+    </color>
 </resources>
