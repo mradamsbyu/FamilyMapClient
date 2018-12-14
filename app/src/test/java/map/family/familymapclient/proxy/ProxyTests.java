@@ -3,11 +3,18 @@ package map.family.familymapclient.proxy;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.util.ArrayList;
+
 import map.family.familymapclient.client.HttpClient;
+import map.family.familymapclient.memberobjects.Auth;
+import map.family.familymapclient.memberobjects.Event;
+import map.family.familymapclient.memberobjects.Person;
 import map.family.familymapclient.model.Model;
 import map.family.familymapclient.request.LoginRequest;
 import map.family.familymapclient.request.RegisterRequest;
+import map.family.familymapclient.response.EventResponse;
 import map.family.familymapclient.response.LoginResponse;
+import map.family.familymapclient.response.PersonResponse;
 import map.family.familymapclient.response.RegisterResponse;
 
 import static org.junit.Assert.*;
@@ -16,13 +23,12 @@ public class ProxyTests {
 
     @BeforeClass
     public static void setUP(){
-        HttpClient.getInstance().setServer("192.168.2.32","8000");
+        HttpClient.getInstance().setServer("192.168.252.30","8080");
     }
 
     @Test
     public void register() {
         HttpClient.getInstance().postRequest(null, "/clear");
-
         RegisterRequest registerRequest = new RegisterRequest("user", "pass", "email", "first", "last", "m");
         RegisterResponse registerResponse = RegisterProxy.getInstance().register(registerRequest);
         assertEquals("user", registerResponse.getUserName());
@@ -93,17 +99,75 @@ public class ProxyTests {
 
     @Test
     public void getPersons() {
+        HttpClient.getInstance().postRequest(null, "/clear");
+        RegisterRequest registerRequest = new RegisterRequest("user", "pass", "email", "first", "last", "m");
+        RegisterProxy.getInstance().register(registerRequest);
+        PersonResponse personResponse = PersonProxy.getInstance().getPersons();
+        assertNull(personResponse.getError());
+        assertNull(personResponse.getDescendant());
+        assertNull(personResponse.getFather());
+        assertNull(personResponse.getFirstName());
+        assertNull(personResponse.getGender());
+        assertNull(personResponse.getLastName());
+        assertNull(personResponse.getMother());
+        assertNull(personResponse.getPersonID());
+        assertNull(personResponse.getSpouse());
+        assertNotNull(personResponse.getPersons());
+        ArrayList<Person> persons = personResponse.getPersons();
+        assertFalse(persons.isEmpty());
     }
 
     @Test
-    public void getPersonsFail() {
+    public void getPersonsWithoutRegistering() {
+        HttpClient.getInstance().postRequest(null, "/clear");
+        PersonResponse personResponse = PersonProxy.getInstance().getPersons();
+        assertEquals("Invalid auth token", personResponse.getError());
+        assertNull(personResponse.getDescendant());
+        assertNull(personResponse.getFather());
+        assertNull(personResponse.getFirstName());
+        assertNull(personResponse.getGender());
+        assertNull(personResponse.getLastName());
+        assertNull(personResponse.getMother());
+        assertNull(personResponse.getPersonID());
+        assertNull(personResponse.getSpouse());
+        assertNull(personResponse.getPersons());
     }
 
     @Test
     public void getEvents() {
+        HttpClient.getInstance().postRequest(null, "/clear");
+        RegisterRequest registerRequest = new RegisterRequest("user", "pass", "email", "first", "last", "m");
+        RegisterProxy.getInstance().register(registerRequest);
+        EventResponse eventResponse = EventProxy.getInstance().getEvents();
+        assertNull(eventResponse.getMessage());
+        assertNull(eventResponse.getDescendant());
+        assertNull(eventResponse.getCity());
+        assertNull(eventResponse.getCountry());
+        assertNull(eventResponse.getEventID());
+        assertNull(eventResponse.getEventType());
+        assertNull(eventResponse.getLatitude());
+        assertNull(eventResponse.getLongitude());
+        assertNull(eventResponse.getPersonID());
+        assertNull(eventResponse.getYear());
+        assertNotNull(eventResponse.getEvents());
+        ArrayList<Event> events = eventResponse.getEvents();
+        assertFalse(events.isEmpty());
     }
 
     @Test
-    public void getEventsFail() {
+    public void getEventsWithoutRegistering() {
+        HttpClient.getInstance().postRequest(null, "/clear");
+        EventResponse eventResponse = EventProxy.getInstance().getEvents();
+        assertEquals("ERROR: Bad Request", eventResponse.getMessage());
+        assertNull(eventResponse.getDescendant());
+        assertNull(eventResponse.getCity());
+        assertNull(eventResponse.getCountry());
+        assertNull(eventResponse.getEventID());
+        assertNull(eventResponse.getEventType());
+        assertNull(eventResponse.getLatitude());
+        assertNull(eventResponse.getLongitude());
+        assertNull(eventResponse.getPersonID());
+        assertNull(eventResponse.getYear());
+        assertNull(eventResponse.getEvents());
     }
 }

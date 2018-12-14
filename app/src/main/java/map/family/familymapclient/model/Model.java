@@ -1,20 +1,26 @@
 package map.family.familymapclient.model;
 
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Marker;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Random;
-import java.util.TreeMap;
 
 import map.family.familymapclient.memberobjects.Auth;
 import map.family.familymapclient.memberobjects.Event;
 import map.family.familymapclient.memberobjects.Person;
-import map.family.familymapclient.memberobjects.User;
 
+import static android.graphics.Color.BLUE;
+import static android.graphics.Color.GREEN;
+import static android.graphics.Color.MAGENTA;
+import static android.graphics.Color.RED;
+import static android.graphics.Color.YELLOW;
+import static com.google.android.gms.maps.GoogleMap.MAP_TYPE_HYBRID;
+import static com.google.android.gms.maps.GoogleMap.MAP_TYPE_NORMAL;
+import static com.google.android.gms.maps.GoogleMap.MAP_TYPE_SATELLITE;
+import static com.google.android.gms.maps.GoogleMap.MAP_TYPE_TERRAIN;
 import static com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_AZURE;
 import static com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_BLUE;
 import static com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_CYAN;
@@ -36,13 +42,13 @@ public class Model {
      */
     private Auth userAuthToken;
     /**
-     * List of relatives of the user
+     * Set of relatives of the user
      */
-    private ArrayList<Person> persons; //change to set
+    private HashSet<Person> persons;
     /**
-     * List of life events of the relatives of the user
+     * Set of life events of the relatives of the user
      */
-    private ArrayList<Event> events; //change to set
+    private HashSet<Event> events;
     /**
      * Map that maps events with their corresponding person
      */
@@ -90,36 +96,51 @@ public class Model {
     /**
      * Maps an event type to whether this event is filtered
      */
-    HashMap<String, Boolean> eventsFiltered;
+    private HashMap<String, Boolean> eventsFiltered;
     /**
      * Is true if the fathers side is filtered
      */
-    boolean fatherSideFiltered = false;
+    private boolean fatherSideFiltered = false;
     /**
      * Is true if the mothers side is filtered
      */
-    boolean motherSideFiltered = false;
+    private boolean motherSideFiltered = false;
     /**
      * Is true if males are filtered
      */
-    boolean maleFiltered = false;
+    private boolean maleFiltered = false;
     /**
      * Is true if females are filtered
      */
-    boolean femaleFiltered = false;
-
-    /*
-    people and events for logged-in user's family tree
-	sorted list of events for each person
-	list of children for each person
-	event types
-	event type colors
-	paternal ancestors
-	maternal ancestors
-	Settings (2.5%)
-    Filter (2.1%)
-    Search (1.8%)
+    private boolean femaleFiltered = false;
+    /**
+     * Color of the spouse lines
      */
+    private int spouseLineColor;
+    /**
+     * Color of the family tree lines
+     */
+    private int familyTreeLineColor;
+    /**
+     * Color of the life story lines
+     */
+    private int lifeStoryLineColor;
+    /**
+     * Is true if spouse lines are enabled in settings
+     */
+    private boolean spouseLinesEnabled = true;
+    /**
+     * Is true if family tree lines are enabled in settings
+     */
+    private boolean familyTreeLinesEnabled = true;
+    /**
+     * Is true if life story lines are enabled in settings
+     */
+    private boolean lifeStoryLinesEnabled = true;
+    /**
+     *  Represents the type of map that is displayed (Normal, Satellite, Hybrid, or Terrain)
+     */
+    private int mapType;
 
     /**
      * Singleton function for getting the singleton instance of this class
@@ -147,18 +168,18 @@ public class Model {
         eventMarkers = new HashMap<>();
         eventPersonMap = new HashMap<>();
         eventsFiltered = new HashMap<>();
-        persons = new ArrayList<>();
-        events = new ArrayList<>();
+        persons = new HashSet<>();
+        events = new HashSet<>();
         eventTypes = new HashSet<>();
         mothersSide = new HashSet<>();
         fathersSide = new HashSet<>();
+        spouseLineColor = BLUE;
+        familyTreeLineColor = YELLOW;
+        lifeStoryLineColor = RED;
+        mapType = MAP_TYPE_NORMAL;
         currentEvent = null;
         userAuthToken = null;
         currentPerson = null;
-        //setEventTypeColor("Birth", BitmapDescriptorFactory.HUE_CYAN);//Set as constants or get from a variable
-        //setEventTypeColor("Baptism", BitmapDescriptorFactory.HUE_GREEN);
-        //setEventTypeColor("Marriage", BitmapDescriptorFactory.HUE_MAGENTA);
-        //setEventTypeColor("Death", BitmapDescriptorFactory.HUE_ORANGE);
     }
 
     /**
@@ -191,11 +212,73 @@ public class Model {
     }
 
     /**
+     * Updates lists of maternal and paternal ancestors
+      */
+    private void updateParentSideLists() {
+        Person user;
+        Iterator<Person> it = persons.iterator();
+        Person somePerson = it.next();
+        List<Person> children;
+        do {
+            children = getChildren(somePerson.getPersonID(), somePerson.getGender().equals("m"));
+            if (children.size() > 0) {
+                somePerson = children.get(0);
+            }
+        } while (children.size() > 0);
+        user = somePerson;
+        if (user != null) {
+            Person mother = getPersonFromId(user.getMother());
+            Person father = getPersonFromId(user.getFather());
+            mothersSide.add(mother);
+            fathersSide.add(father);
+            addMaternalAncestors(mother);
+            addPaternalAncestors(father);
+        }
+    }
+
+    /**
+     * Recursively adds maternal ancestors to the set mothersSide
+     * @param parent parent whose parents are to be added to the list if they exist
+     */
+    private void addMaternalAncestors(Person parent) {
+        if (parent.getFather() != null) {
+            Person father = getPersonFromId(parent.getFather());
+            mothersSide.add(father);
+            addMaternalAncestors(father);
+        }
+        if (parent.getMother() != null) {
+            Person mother = getPersonFromId(parent.getMother());
+            mothersSide.add(mother);
+            addMaternalAncestors(mother);
+        }
+    }
+
+    /**
+     * Recursively adds paternal ancestors to the set fathersSide
+     * @param parent parent whose parents are to be added to the list if they exist
+     */
+    private void addPaternalAncestors(Person parent) {
+        if (parent.getFather() != null) {
+            Person father = getPersonFromId(parent.getFather());
+            fathersSide.add(father);
+            addPaternalAncestors(father);
+        }
+        if (parent.getMother() != null) {
+            Person mother = getPersonFromId(parent.getMother());
+            fathersSide.add(mother);
+            addPaternalAncestors(mother);
+        }
+    }
+
+    /**
      * Returns the person object associated with a person id
      * @param id person id of the person you are looking for
      * @return Person object associated with the id, or null if that id does not exist in the database
      */
     public Person getPersonFromId(String id) {
+        if (id == null) {
+            return null;
+        }
         for (Person person: persons) {
             if (person.getPersonID().equals(id)) {
                 return person;
@@ -205,7 +288,7 @@ public class Model {
     }
 
     /**
-     * Gets a list of events corresponding to a person
+     * Gets a list of events corresponding to a person, ordered chronologically
      * @param personId Person id of the individual we want the events of
      * @return ArrayList of Event objects representing the events
      */
@@ -229,7 +312,7 @@ public class Model {
             }
             else if (event.getYear() != null) {
                 for (int i = 0; i < orderedEvents.size(); i++) {
-                    if (event.getYear() == orderedEvents.get(i).getYear()) {
+                    if (event.getYear().equals(orderedEvents.get(i).getYear())) {
                         if (orderedEvents.get(i).getEventType().compareToIgnoreCase(event.getEventType()) < 0) {
                             orderedEvents.add(i + 1, event);
                         }
@@ -262,7 +345,7 @@ public class Model {
         if (birth != null) {
             orderedEvents.add(0, birth);
         }
-        return personEvents;
+        return orderedEvents;
     }
 
     /**
@@ -280,15 +363,6 @@ public class Model {
     }
 
     /**
-     * Sets the color of the map markers for a given event
-     * @param eventType string representation of an event type
-     * @param color A color from the BitmapDescriptorFactory
-     */
-    public void setEventTypeColor(String eventType, Float color) {
-
-    }
-
-    /**
      * Get a marker color given the event type
      * @param eventType String representing the event type
      * @return Float representing a color from the BitmapDescriptorFactory
@@ -297,7 +371,7 @@ public class Model {
         if (!eventTypeColors.containsKey(eventType.toLowerCase())) {
             eventTypeColors.put(eventType.toLowerCase(), eventColors[eventColorCounter]);
             eventColorCounter++;
-            if (eventColorCounter >= 10) {
+            if (eventColorCounter >= eventColors.length) {
                 eventColorCounter = 0;
             }
         }
@@ -323,7 +397,7 @@ public class Model {
      */
     public void updateEventTypes() {
         for (Event event : events) {
-            eventTypes.add(event.getEventType());
+            eventTypes.add(event.getEventType().toLowerCase());
         }
     }
 
@@ -338,7 +412,7 @@ public class Model {
         for (String eventType : eventTypes) {
             if (!eventsFiltered.containsKey(eventType)) {
                 eventsFiltered.put(eventType, false);
-            } else if (event.getEventType().equals(eventType) && eventsFiltered.get(eventType)) {
+            } else if (event.getEventType().toLowerCase().equals(eventType) && eventsFiltered.get(eventType)) {
                 return true;
             }
         }
@@ -349,6 +423,33 @@ public class Model {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Sets the given filter type to be filtered or not
+     * @param eventType Filter type to be set
+     * @param filterState State to be set to (true or false)
+     */
+    public void setFilterItem(String eventType, boolean filterState) {
+        for (String type : eventTypes) {
+            if (type.equals(eventType.toLowerCase())) {
+                eventsFiltered.put(eventType.toLowerCase(), filterState);
+            }
+        }
+    }
+
+    /**
+     * Indicates whether a certain event type is currently filtered
+     * @param eventType The type of event that is to be checked
+     * @return Boolean indicating if the event type is filtered.  If event type does not exist, false is returned.
+     */
+    public boolean typeIsFiltered(String eventType) {
+        if (eventsFiltered.containsKey(eventType.toLowerCase())) {
+            return eventsFiltered.get(eventType.toLowerCase());
+        }
+        else {
+            return false;
+        }
     }
 
     /**
@@ -394,6 +495,99 @@ public class Model {
         return true;
     }
 
+    /**
+     * Gets an integer representation of a color given its string representation
+     * @param stringColor String representation of a colr
+     * @return Integer representation of a color
+     */
+    private int getColorFromString(String stringColor) {
+        int color = RED;
+        if (stringColor.equals("Red")) {
+            color = RED;
+        }
+        else if (stringColor.equals("Yellow")) {
+            color = YELLOW;
+        }
+        else if (stringColor.equals("Blue")) {
+            color = BLUE;
+        }
+        else if (stringColor.equals("Green")) {
+            color = GREEN;
+        }
+        else if (stringColor.equals("Pink")) {
+            color = MAGENTA;
+        }
+        return color;
+    }
+
+    /**
+     * Gets the position of the spinner in the settings that corresponds to the given color
+     * @param color Color that we want the spinner position of
+     * @return Spinner position of that color
+     */
+    public int getSpinnerPositionFromColor(int color) {
+        if (color == RED) {
+            return 0;
+        }
+        else if (color == YELLOW) {
+            return 1;
+        }
+        else if (color == BLUE) {
+            return 2;
+        }
+        else if (color == GREEN) {
+            return 3;
+        }
+        else if (color == MAGENTA) {
+            return 4;
+        }
+        return 0;
+    }
+
+    /**
+     * Gets an integer representation of a map type given its string representation
+     * @param stringMapType String representation of a map type
+     * @return Integer representation of that map type
+     */
+    private int getMapTypeFromString(String stringMapType) {
+        int mapType = MAP_TYPE_NORMAL;
+        if (stringMapType.equals("Normal")) {
+            mapType = MAP_TYPE_NORMAL;
+        }
+        else if (stringMapType.equals("Hybrid")) {
+            mapType = MAP_TYPE_HYBRID;
+        }
+        else if (stringMapType.equals("Satellite")) {
+            mapType = MAP_TYPE_SATELLITE;
+        }
+        else if (stringMapType.equals("Terrain")) {
+            mapType = MAP_TYPE_TERRAIN;
+        }
+        return mapType;
+    }
+
+    /**
+     * Gets a spinner position of the map type spinner given the map type
+     * @param mapType Map type that we want the position of
+     * @return Integer representation of the map type
+     */
+    public int getSpinnerPositionFromMapType(int mapType) {
+        if (mapType == MAP_TYPE_NORMAL) {
+            return 0;
+        }
+        else if (mapType == MAP_TYPE_HYBRID) {
+            return 1;
+        }
+        else if (mapType == MAP_TYPE_SATELLITE) {
+            return 2;
+        }
+        else if (mapType == MAP_TYPE_TERRAIN) {
+            return 3;
+        }
+        return 0;
+    }
+
+
     public Auth getUserAuthToken() {
         return userAuthToken;
     }
@@ -402,23 +596,24 @@ public class Model {
         this.userAuthToken = userAuthToken;
     }
 
-    public ArrayList<Person> getPersons() {
+    public HashSet<Person> getPersons() {
         return persons;
     }
 
-    public void setPersons(ArrayList<Person> persons) {
+    public void setPersons(HashSet<Person> persons) {
         this.persons = persons;
+        updateParentSideLists();
     }
 
     public void addPerson(Person person) {
         this.persons.add(person);
     }
 
-    public ArrayList<Event> getEvents() {
+    public HashSet<Event> getEvents() {
         return events;
     }
 
-    public void setEvents(ArrayList<Event> events) {
+    public void setEvents(HashSet<Event> events) {
         this.events = events;
     }
 
@@ -440,5 +635,117 @@ public class Model {
 
     public void setCurrentPerson(Person currentPerson) {
         this.currentPerson = currentPerson;
+    }
+
+    public boolean isSpouseLinesEnabled() {
+        return spouseLinesEnabled;
+    }
+
+    public void setSpouseLinesEnabled(boolean spouseLinesEnabled) {
+        this.spouseLinesEnabled = spouseLinesEnabled;
+    }
+
+    public boolean isFamilyTreeLinesEnabled() {
+        return familyTreeLinesEnabled;
+    }
+
+    public void setFamilyTreeLinesEnabled(boolean familyTreeLinesEnabled) {
+        this.familyTreeLinesEnabled = familyTreeLinesEnabled;
+    }
+
+    public boolean isLifeStoryLinesEnabled() {
+        return lifeStoryLinesEnabled;
+    }
+
+    public void setLifeStoryLinesEnabled(boolean lifeStoryLinesEnabled) {
+        this.lifeStoryLinesEnabled = lifeStoryLinesEnabled;
+    }
+
+    public int getSpouseLineColor() {
+        return spouseLineColor;
+    }
+
+    public void setSpouseLineColor(int spouseLineColor) {
+        this.spouseLineColor = spouseLineColor;
+    }
+
+    public void setSpouseLineColor(String spouseLineColor) {
+        this.spouseLineColor = getColorFromString(spouseLineColor);
+    }
+
+    public int getFamilyTreeLineColor() {
+        return familyTreeLineColor;
+    }
+
+    public void setFamilyTreeLineColor(int familyTreeLineColor) {
+        this.familyTreeLineColor = familyTreeLineColor;
+    }
+
+    public void setFamilyTreeLineColor(String familyTreeLineColor) {
+        this.familyTreeLineColor = getColorFromString(familyTreeLineColor);
+    }
+
+    public int getLifeStoryLineColor() {
+        return lifeStoryLineColor;
+    }
+
+    public void setLifeStoryLineColor(String lifeStoryLineColor) {
+        this.lifeStoryLineColor = getColorFromString(lifeStoryLineColor);
+    }
+
+    public void setLifeStoryLineColor(int lifeStoryLineColor) {
+        this.lifeStoryLineColor = lifeStoryLineColor;
+    }
+
+    public boolean isFatherSideFiltered() {
+        return fatherSideFiltered;
+    }
+
+    public void setFatherSideFiltered(boolean fatherSideFiltered) {
+        this.fatherSideFiltered = fatherSideFiltered;
+    }
+
+    public boolean isMotherSideFiltered() {
+        return motherSideFiltered;
+    }
+
+    public void setMotherSideFiltered(boolean motherSideFiltered) {
+        this.motherSideFiltered = motherSideFiltered;
+    }
+
+    public boolean isMaleFiltered() {
+        return maleFiltered;
+    }
+
+    public void setMaleFiltered(boolean maleFiltered) {
+        this.maleFiltered = maleFiltered;
+    }
+
+    public boolean isFemaleFiltered() {
+        return femaleFiltered;
+    }
+
+    public void setFemaleFiltered(boolean femaleFiltered) {
+        this.femaleFiltered = femaleFiltered;
+    }
+
+    public int getMapType() {
+        return mapType;
+    }
+
+    public void setMapType(int mapType) {
+        this.mapType = mapType;
+    }
+
+    public void setMapType(String mapType) {
+        this.mapType = getMapTypeFromString(mapType);
+    }
+
+    public HashSet<String> getEventTypes() {
+        return eventTypes;
+    }
+
+    public void setEventTypes(HashSet<String> eventTypes) {
+        this.eventTypes = eventTypes;
     }
 }

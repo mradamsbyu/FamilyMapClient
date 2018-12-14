@@ -58,7 +58,9 @@ public class HttpClient {
             http = (HttpURLConnection)url.openConnection();
             http.setRequestMethod("GET");
             http.setDoOutput(false);
-            http.addRequestProperty("Authorization", Model.getInstance().getUserAuthToken().getAuthToken());
+            if (Model.getInstance().authTokenExists()) {
+                http.addRequestProperty("Authorization", Model.getInstance().getUserAuthToken().getAuthToken());
+            }
             http.connect();
             if (http.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 InputStream respBody = http.getInputStream();
@@ -90,6 +92,9 @@ public class HttpClient {
             if (requestData != null) {
                 http.setDoOutput(true);
             }
+            else {
+                http.setDoOutput(false);
+            }
             if (Model.getInstance().authTokenExists()) {
                 http.addRequestProperty("Authorization", Model.getInstance().getUserAuthToken().getAuthToken());
             }
@@ -100,9 +105,6 @@ public class HttpClient {
                 sw.write(requestData);
                 sw.flush();
                 requestBody.close();
-            }
-            else {
-                http.setDoOutput(false);
             }
             if (http.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 InputStream responseBody = http.getInputStream();
