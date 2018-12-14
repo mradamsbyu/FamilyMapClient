@@ -1,9 +1,5 @@
 package map.family.familymapclient.model;
 
-import android.graphics.Color;
-import android.widget.Spinner;
-
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Marker;
 
 import java.util.ArrayList;
@@ -11,13 +7,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Random;
-import java.util.TreeMap;
 
 import map.family.familymapclient.memberobjects.Auth;
 import map.family.familymapclient.memberobjects.Event;
 import map.family.familymapclient.memberobjects.Person;
-import map.family.familymapclient.memberobjects.User;
 
 import static android.graphics.Color.BLUE;
 import static android.graphics.Color.GREEN;
@@ -222,7 +215,7 @@ public class Model {
      * Updates lists of maternal and paternal ancestors
       */
     private void updateParentSideLists() {
-        Person user = null;
+        Person user;
         Iterator<Person> it = persons.iterator();
         Person somePerson = it.next();
         List<Person> children;
@@ -356,22 +349,6 @@ public class Model {
     }
 
     /**
-     * Gets the birth event of a certain person
-     * @param personId id of the person whose id you are seeking
-     * @return Birth event of the person of interest, or null if the person has no birth event
-     */
-    public Event getBirthFromPersonId(String personId) {
-        for (Event event : events) {
-            if (event.getPerson().equals(personId)) {
-                if (event.getEventType().toLowerCase().equals("birth")) {
-                    return event;
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
      * Gets an event given an event id
      * @param id id of the desired event
      * @return Event object with the given event id
@@ -383,15 +360,6 @@ public class Model {
             }
         }
         return null;
-    }
-
-    /**
-     * Sets the color of the map markers for a given event
-     * @param eventType string representation of an event type
-     * @param color A color from the BitmapDescriptorFactory
-     */
-    public void setEventTypeColor(String eventType, Float color) {
-
     }
 
     /**
@@ -526,6 +494,99 @@ public class Model {
         }
         return true;
     }
+
+    /**
+     * Gets an integer representation of a color given its string representation
+     * @param stringColor String representation of a colr
+     * @return Integer representation of a color
+     */
+    private int getColorFromString(String stringColor) {
+        int color = RED;
+        if (stringColor.equals("Red")) {
+            color = RED;
+        }
+        else if (stringColor.equals("Yellow")) {
+            color = YELLOW;
+        }
+        else if (stringColor.equals("Blue")) {
+            color = BLUE;
+        }
+        else if (stringColor.equals("Green")) {
+            color = GREEN;
+        }
+        else if (stringColor.equals("Pink")) {
+            color = MAGENTA;
+        }
+        return color;
+    }
+
+    /**
+     * Gets the position of the spinner in the settings that corresponds to the given color
+     * @param color Color that we want the spinner position of
+     * @return Spinner position of that color
+     */
+    public int getSpinnerPositionFromColor(int color) {
+        if (color == RED) {
+            return 0;
+        }
+        else if (color == YELLOW) {
+            return 1;
+        }
+        else if (color == BLUE) {
+            return 2;
+        }
+        else if (color == GREEN) {
+            return 3;
+        }
+        else if (color == MAGENTA) {
+            return 4;
+        }
+        return 0;
+    }
+
+    /**
+     * Gets an integer representation of a map type given its string representation
+     * @param stringMapType String representation of a map type
+     * @return Integer representation of that map type
+     */
+    private int getMapTypeFromString(String stringMapType) {
+        int mapType = MAP_TYPE_NORMAL;
+        if (stringMapType.equals("Normal")) {
+            mapType = MAP_TYPE_NORMAL;
+        }
+        else if (stringMapType.equals("Hybrid")) {
+            mapType = MAP_TYPE_HYBRID;
+        }
+        else if (stringMapType.equals("Satellite")) {
+            mapType = MAP_TYPE_SATELLITE;
+        }
+        else if (stringMapType.equals("Terrain")) {
+            mapType = MAP_TYPE_TERRAIN;
+        }
+        return mapType;
+    }
+
+    /**
+     * Gets a spinner position of the map type spinner given the map type
+     * @param mapType Map type that we want the position of
+     * @return Integer representation of the map type
+     */
+    public int getSpinnerPositionFromMapType(int mapType) {
+        if (mapType == MAP_TYPE_NORMAL) {
+            return 0;
+        }
+        else if (mapType == MAP_TYPE_HYBRID) {
+            return 1;
+        }
+        else if (mapType == MAP_TYPE_SATELLITE) {
+            return 2;
+        }
+        else if (mapType == MAP_TYPE_TERRAIN) {
+            return 3;
+        }
+        return 0;
+    }
+
 
     public Auth getUserAuthToken() {
         return userAuthToken;
@@ -678,98 +739,6 @@ public class Model {
 
     public void setMapType(String mapType) {
         this.mapType = getMapTypeFromString(mapType);
-    }
-
-    /**
-     * Gets an integer representation of a color given its string representation
-     * @param stringColor String representation of a colr
-     * @return Integer representation of a color
-     */
-    private int getColorFromString(String stringColor) {
-        int color = RED;
-        if (stringColor.equals("Red")) {
-            color = RED;
-        }
-        else if (stringColor.equals("Yellow")) {
-            color = YELLOW;
-        }
-        else if (stringColor.equals("Blue")) {
-            color = BLUE;
-        }
-        else if (stringColor.equals("Green")) {
-            color = GREEN;
-        }
-        else if (stringColor.equals("Pink")) {
-            color = MAGENTA;
-        }
-        return color;
-    }
-
-    /**
-     * Gets the position of the spinner in the settings that corresponds to the given color
-     * @param color Color that we want the spinner position of
-     * @return Spinner position of that color
-     */
-    public int getSpinnerPositionFromColor(int color) {
-        if (color == RED) {
-            return 0;
-        }
-        else if (color == YELLOW) {
-            return 1;
-        }
-        else if (color == BLUE) {
-            return 2;
-        }
-        else if (color == GREEN) {
-            return 3;
-        }
-        else if (color == MAGENTA) {
-            return 4;
-        }
-        return 0;
-    }
-
-    /**
-     * Gets an integer representation of a map type given its string representation
-     * @param stringMapType String representation of a map type
-     * @return Integer representation of that map type
-     */
-    private int getMapTypeFromString(String stringMapType) {
-        int mapType = MAP_TYPE_NORMAL;
-        if (stringMapType.equals("Normal")) {
-            mapType = MAP_TYPE_NORMAL;
-        }
-        else if (stringMapType.equals("Hybrid")) {
-            mapType = MAP_TYPE_HYBRID;
-        }
-        else if (stringMapType.equals("Satellite")) {
-            mapType = MAP_TYPE_SATELLITE;
-        }
-        else if (stringMapType.equals("Terrain")) {
-            mapType = MAP_TYPE_TERRAIN;
-        }
-        return mapType;
-    }
-
-    /**
-     * Gets a spinner position of the map type spinner given the map type
-     * @param mapType Map type that we want the position of
-     * @return Integer representation of the map type
-     */
-    public int getSpinnerPositionFromMapType(int mapType) {
-        if (mapType == MAP_TYPE_NORMAL) {
-            return 0;
-        }
-        else if (mapType == MAP_TYPE_HYBRID) {
-            return 1;
-        }
-        else if (mapType == MAP_TYPE_SATELLITE) {
-            return 2;
-        }
-        else if (mapType == MAP_TYPE_TERRAIN) {
-            return 3;
-        }
-        return 0;
     }
 
     public HashSet<String> getEventTypes() {
